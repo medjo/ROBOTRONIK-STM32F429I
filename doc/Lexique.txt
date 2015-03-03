@@ -1,0 +1,7 @@
+BSP :	Board Support Package
+HAL :	Hardware Abstraction Layer
+MCU :	MicroController Unit
+MSP :	MCU Support package
+PWM :	Pulse Width Modulation
+RCC :	Real-Time Clock Control
+SPI :	Serial Peripheral Interface
