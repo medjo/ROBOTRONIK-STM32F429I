@@ -81,7 +81,7 @@ START_GDB = arm-none-eabi-gdb ./bin/main.elf --eval-command="target remote local
 #################
 
 
-all :	lib build oclean
+all :	lib build oclean done
 
 build :	compile link convert
 
@@ -89,21 +89,24 @@ build :	compile link convert
 compile :	oclean $(OBJ) $(OBJ_ASS) o2bin
 
 %.o :	%.c
-	$(CC) $(CFLAGS) -c -o $@ $^
+	@ $(CC) $(CFLAGS) -c -o $@ $^
 
 %.o :	%.s
-	$(CC) $(CFLAGS) -c -o $@ $^
-	mv $@ ./bin/
+	@ $(CC) $(CFLAGS) -c -o $@ $^
+	@ mv $@ ./bin/
 
 o2bin :
-	mv *.o ./bin/
+	@ mv *.o ./bin/
+	
+done :
+	@echo 'done ! (if no error)'
 
 link :	compile
-	$(CC) $(LDFLAGS) ./bin/*.o -L$(DIRLIB) $(LIBS) -o $(EXEC)
-	rm -f *.o
+	@ $(CC) $(LDFLAGS) ./bin/*.o -L$(DIRLIB) $(LIBS) -o $(EXEC)
+	@ rm -f *.o
 
 convert :	compile link
-	$(CONVERT)
+	@ $(CONVERT)
 
 flash :
 	$(FLASH)
@@ -119,7 +122,7 @@ debug2 :
 	$(START_GDB)
 
 %.o :	%.c
-	$(CC) $(CFLAGS) -c $^
+	@ $(CC) $(CFLAGS) -c $^
 
 lib:
 	make -C ./lib
@@ -127,8 +130,8 @@ lib:
 clean :	oclean bclean
 
 oclean :
-	rm -f *.o
-	rm -f ./bin/*.o
+	@ rm -f *.o
+	@ rm -f ./bin/*.o
 
 lclean :
 	rm -f ./lib/*.a
