@@ -246,7 +246,7 @@ void init_servo(Servo_t *servoX, GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin) {
     uint32_t Timer_Frequency = 1000000;
 
     // Compute the prescaler value 
-    PrescalerValue = (uint32_t) ((SystemCoreClock /2) / Timer_Frequency) - 1;
+    PrescalerValue = (uint32_t) ((SystemCoreClock) / Timer_Frequency) - 1;
     TIM_Base_InitStructure.Prescaler = PrescalerValue;
     TIM_Base_InitStructure.Period = 20000 - 1;
     TIM_Base_InitStructure.CounterMode = TIM_COUNTERMODE_UP;
@@ -284,7 +284,7 @@ void test_servo(Servo_t *servoX, GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin) {
     display_PWM(GPIOx, GPIO_Pin);
     set_position_servo(10000, servoX);
     display_PWM(GPIOx, GPIO_Pin);
-    set_position_servo(19900, servoX);
+    set_position_servo(19999, servoX);
     display_PWM(GPIOx, GPIO_Pin);
     reset_all_led();
 
