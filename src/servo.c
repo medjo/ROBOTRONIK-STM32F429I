@@ -1,7 +1,13 @@
 #include "servo.h"
 
+
+/*Entrer un angle entre 0° et SERVO_RANGE°*/
 void set_position_servo(uint32_t angle, Servo_t *servoX) {
-    servoX->TIM_OC_InitStructure.Pulse = angle;
+   if (angle < 0 || angle > SERVO_RANGE) {
+        out_of_range();       
+   } 
+
+    servoX->TIM_OC_InitStructure.Pulse = ANGLE_MIN + (angle * (ANGLE_MAX - ANGLE_MIN) / SERVO_RANGE);
     HAL_TIM_PWM_ConfigChannel(&(servoX->TIM_HandleStructure), &(servoX->TIM_OC_InitStructure), servoX->Channel);
     HAL_TIM_PWM_Start(&(servoX->TIM_HandleStructure), servoX->Channel);
 }

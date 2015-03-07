@@ -6,6 +6,12 @@
 #define PIN_OFF 0
 #define PIN_ON 1
 
+/*Valeurs à modifier en fonction du servo*/
+/*Valeur valables pour les servos HS-311 et HS-322HD*/
+#define ANGLE_MIN 680 // largeur de pulsation pour un angle de 0°
+#define ANGLE_MAX 2360 // largeur de pulsation pour un angle de SERVO_RANGE°
+#define SERVO_RANGE 180 // Course du servo en degrés
+
 typedef struct
 {
 

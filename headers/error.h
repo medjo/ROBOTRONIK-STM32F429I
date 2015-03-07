@@ -4,7 +4,7 @@
 #include "main.h"
 #include "LED.h"
 
-void unavailable_pin();
 void mapping_error();
+void out_of_range();
 
 #endif
