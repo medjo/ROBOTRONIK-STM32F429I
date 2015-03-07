@@ -35,7 +35,7 @@ OTHER_OPTIONS = -mlittle-endian -mthumb #-mthumb-interwork
 INCLUDE = $(BASIC_INCLUDES) $(shell find $(STM32Cube)Drivers/ -path "*" -printf "-I%h/\n"|sort -u)#-I../STM32Cube_FW_F4_V1.3.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include/ -I../STM32Cube_FW_F4_V1.3.0/Drivers/CMSIS/Include/ #-I../STM32Cube_FW_F4_V1.3.0/Drivers/STM32F4xx_HAL_Driver/Inc/ -I./headers/ -I../STM32Cube_FW_F4_V1.3.0/Drivers/BSP/STM32F4-Discovery/ -I../STM32Cube_FW_F4_V1.3.0/Drivers/BSP/STM32F4-Discovery/ -I../STM32Cube_FW_F4_V1.3.0/Drivers/BSP/Components/cs43l22/ -I$(STM32Cube)Drivers/BSP/Components/lis3dsh $(shell find ../STM32Cube_FW_F4_V1.3.0/Drivers/ -path "*" -printf "-I%h/\n"|sort -u)
 
 #Répertoires pour les headers requis (core_cm4.h, stm32f4xx.h, stm32f4xx_hal_conf.h, ...)
-BASIC_INCLUDES = -I$(STM32Cube)rivers/CMSIS/Device/ST/STM32F4xx/Include/ -I$(STM32Cube)Projects/STM32F4-Discovery/Templates/Inc/ -I$(STM32Cube)Drivers/CMSIS/Include/
+BASIC_INCLUDES = -I$(STM32Cube)Drivers/CMSIS/Device/ST/STM32F4xx/Include/ -I$(STM32Cube)Projects/STM32F4-Discovery/Templates/Inc/ -I$(STM32Cube)Drivers/CMSIS/Include/
 
 #Fichiers sources des librairies à compiler
 SRC_HAL_Driver = $(shell find $(STM32Cube)Drivers/STM32F4xx_HAL_Driver/ -name *.c)
