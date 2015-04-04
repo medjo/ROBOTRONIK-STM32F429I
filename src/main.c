@@ -40,34 +40,34 @@ void Error_UART(){
 	}
 }
 
+void send_word(UART_HandleTypeDef *UART_HandleStructure, const char *str);
 
 int main(void) {
 
 	init();
-	
 	init_GPIO_LED();
 	
 	
-	UART_HandleTypeDef	UART_HandleStructure;
+	//UART_HandleTypeDef	UART_HandleStructure_T;
+	UART_HandleTypeDef	UART_HandleStructure_R;
 	
-	//UART_HandleTypeDef	UART_HandleStructure_R;
+		
 	
-	//init_UART_transmitter(&UART_HandleStructure_T);
-	//init_UART_receiver(&UART_HandleStructure_R);
+	
 	__UART4_CLK_ENABLE();
 	
 	//Configuration de l'UART d'émission
-	UART_HandleStructure.Init.BaudRate = 9600;//9600->104µS par bit transmis
-	UART_HandleStructure.Init.WordLength = UART_WORDLENGTH_8B;
-	UART_HandleStructure.Init.StopBits = UART_STOPBITS_1;
-	UART_HandleStructure.Init.Parity = UART_PARITY_NONE; //ou UART_PARITY_EVEN ou UART_PARITY_ODD
-	UART_HandleStructure.Init.Mode = UART_MODE_TX_RX; // ou UART_MODE_RX ou UART_MODE_TX_RX
-	UART_HandleStructure.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-	UART_HandleStructure.Init.OverSampling = UART_OVERSAMPLING_8;
-	UART_HandleStructure.Instance = UART4;
+	UART_HandleStructure_R.Init.BaudRate = 9600;//1;//4095
+	UART_HandleStructure_R.Init.WordLength = UART_WORDLENGTH_8B;
+	UART_HandleStructure_R.Init.StopBits = UART_STOPBITS_1;
+	UART_HandleStructure_R.Init.Parity = UART_PARITY_NONE; //ou UART_PARITY_EVEN ou UART_PARITY_ODD
+	UART_HandleStructure_R.Init.Mode = UART_MODE_TX_RX; // ou UART_MODE_RX ou UART_MODE_TX_RX
+	UART_HandleStructure_R.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	UART_HandleStructure_R.Init.OverSampling = UART_OVERSAMPLING_8;
+	UART_HandleStructure_R.Instance = UART4;
 	
 	//HAL_UART_Init(UART_HandleStructure);
-	if(HAL_UART_Init(&UART_HandleStructure) != HAL_OK)
+	if(HAL_UART_Init(&UART_HandleStructure_R) != HAL_OK)
 	{
 		Error_UART();
 	}
@@ -75,6 +75,7 @@ int main(void) {
 	
 	//AF7 : Pin A0 : USART4_TX
 	__GPIOA_CLK_ENABLE();
+	
 	
 	
 	//Configuration du pin de transmission
@@ -91,32 +92,72 @@ int main(void) {
 	
 	
 	
-	uint8_t buf[4];
-	buf[0] = 'B';
-	buf[1] = 'O';
-	buf[2] = '!';
-	buf[3] = ' ';
 	
-	//char *buf = "empty";
 	
-
-	//HAL_UART_Receive_IT(&UART_HandleStructure_R, (uint8_t *)buf, strlen(str));
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//init_UART_receiver(&UART_HandleStructure_R);
+	//init_UART_transmitter(&UART_HandleStructure_T);
+	//send_word(&UART_HandleStructure_T, "Bonjour cher ami ! \n ^^");
+	
+	
+	uint8_t *buf[4];
+	
+	buf[0] = 'W';
+	buf[1] = 'a';
+	buf[2] = 'i';
+	buf[3] = 't';
+	
 	
 	HAL_GPIO_WritePin(GPIOD, LED_VERTE, GPIO_PIN_SET);
 	//HAL_UART_Transmit(&UART_HandleStructure_T, buf, 4, 5000);
 	
 	while (1)
 	{
-			HAL_UART_Transmit(&UART_HandleStructure, buf, 4, 20);
-			Delay(1000);
+		HAL_UART_Receive_IT(&UART_HandleStructure_R, (uint8_t *)buf, 4);
+		if (buf[0] != 'W') {
+			while (1) {
+				Delay(500);
+				HAL_GPIO_TogglePin(GPIOD, LED_BLEUE);
+			}
+		}
+		Delay(500);
 	}
     return 0;
 }
 
-/*
+void send_word(UART_HandleTypeDef *UART_HandleStructure, const char *str) {
+
+	/*
+	int i = 0 ;
+	uint8_t size_buffer = strlen(str);
+	uint8_t buffer[size_buffer];
+	while (i < size_buffer) {
+		
+	}*/
+	
+	HAL_UART_Transmit(UART_HandleStructure, str, strlen(str), 20);
+	
+}
+
+
+
 void init_UART_transmitter(UART_HandleTypeDef *UART_HandleStructure) {
 	
-
+	__UART4_CLK_ENABLE();
+	
 	//Configuration de l'UART d'émission
 	UART_HandleStructure->Init.BaudRate = 9600;//1;//4095
 	UART_HandleStructure->Init.WordLength = UART_WORDLENGTH_8B;
@@ -124,7 +165,7 @@ void init_UART_transmitter(UART_HandleTypeDef *UART_HandleStructure) {
 	UART_HandleStructure->Init.Parity = UART_PARITY_NONE; //ou UART_PARITY_EVEN ou UART_PARITY_ODD
 	UART_HandleStructure->Init.Mode = UART_MODE_TX_RX; // ou UART_MODE_RX ou UART_MODE_TX_RX
 	UART_HandleStructure->Init.HwFlowCtl = UART_HWCONTROL_NONE;
-	UART_HandleStructure->Init.OverSampling = UART_OVERSAMPLING_16;
+	UART_HandleStructure->Init.OverSampling = UART_OVERSAMPLING_8;
 	UART_HandleStructure->Instance = UART4;
 	
 	//HAL_UART_Init(UART_HandleStructure);
@@ -188,4 +229,4 @@ void init_UART_receiver(UART_HandleTypeDef *UART_HandleStructure) {
     //Configure this pin in Alternate function mode
     HAL_GPIO_Init(GPIOA, &GPIO_InitStructure_UART);
 
-}*/
+}
