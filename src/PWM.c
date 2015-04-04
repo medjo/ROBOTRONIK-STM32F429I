@@ -33,6 +33,7 @@ void init_PWM() {
     TIM_HandleStructure.Channel = HAL_TIM_ACTIVE_CHANNEL_4;
     HAL_TIM_Base_Init(&TIM_HandleStructure);
     //HAL_TIM_Base_Start_IT(&TIM_HandleStructure);
+    
     //INITIALISATION PWM
     TIM_OC_InitTypeDef TIM_OC_InitStructure;
     //PWM mode 1

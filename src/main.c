@@ -57,11 +57,11 @@ int main(void) {
 	__UART4_CLK_ENABLE();
 	
 	//Configuration de l'UART d'émission
-	UART_HandleStructure.Init.BaudRate = 9600;//1;//4095
+	UART_HandleStructure.Init.BaudRate = 9600;//9600->104µS par bit transmis
 	UART_HandleStructure.Init.WordLength = UART_WORDLENGTH_8B;
 	UART_HandleStructure.Init.StopBits = UART_STOPBITS_1;
 	UART_HandleStructure.Init.Parity = UART_PARITY_NONE; //ou UART_PARITY_EVEN ou UART_PARITY_ODD
-	UART_HandleStructure.Init.Mode = UART_MODE_TX; // ou UART_MODE_RX ou UART_MODE_TX_RX
+	UART_HandleStructure.Init.Mode = UART_MODE_TX_RX; // ou UART_MODE_RX ou UART_MODE_TX_RX
 	UART_HandleStructure.Init.HwFlowCtl = UART_HWCONTROL_NONE;
 	UART_HandleStructure.Init.OverSampling = UART_OVERSAMPLING_8;
 	UART_HandleStructure.Instance = UART4;
@@ -92,10 +92,10 @@ int main(void) {
 	
 	
 	uint8_t buf[4];
-	buf[0] = 0xF;
-	buf[1] = 0x0;
-	buf[2] = 0xF;
-	buf[3] = 0x0;
+	buf[0] = 'B';
+	buf[1] = 'O';
+	buf[2] = '!';
+	buf[3] = ' ';
 	
 	//char *buf = "empty";
 	
@@ -104,13 +104,11 @@ int main(void) {
 	
 	HAL_GPIO_WritePin(GPIOD, LED_VERTE, GPIO_PIN_SET);
 	//HAL_UART_Transmit(&UART_HandleStructure_T, buf, 4, 5000);
+	
 	while (1)
 	{
 			HAL_UART_Transmit(&UART_HandleStructure, buf, 4, 20);
-			buf[0] = 'H';
-			buf[1] = 'e';
-			buf[2] = 'l';
-			buf[3] = 'o';
+			Delay(1000);
 	}
     return 0;
 }
