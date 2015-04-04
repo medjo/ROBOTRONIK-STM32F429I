@@ -1,0 +1,3 @@
+void envoyer (char *str){
+
+}

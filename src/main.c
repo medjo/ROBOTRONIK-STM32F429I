@@ -1,6 +1,9 @@
 #include "main.h"
 
+#include <string.h>
 
+void init_UART_receiver(UART_HandleTypeDef *UART_HandleStructure);
+void init_UART_transmitter(UART_HandleTypeDef *UART_HandleStructure);
 
 /*
  * Called from systick handler
@@ -29,47 +32,162 @@ void SysTick_Handler(void)
 
 
 
-
-
-
-
+void Error_UART(){
+	reset_all_led();
+	while (1) {
+		Delay(500);
+		HAL_GPIO_TogglePin(GPIOD, LED_ROUGE);
+	}
+}
 
 
 int main(void) {
 
-/* Servo HS-311 minimum : 551   max : 2426
- *              0°: 680     90° : 1500      180° : 2360*/
-    init();
-    init_GPIO_LED();
+	init();
+	
+	init_GPIO_LED();
+	
+	
+	UART_HandleTypeDef	UART_HandleStructure;
+	
+	//UART_HandleTypeDef	UART_HandleStructure_R;
+	
+	//init_UART_transmitter(&UART_HandleStructure_T);
+	//init_UART_receiver(&UART_HandleStructure_R);
+	__UART4_CLK_ENABLE();
+	
+	//Configuration de l'UART d'émission
+	UART_HandleStructure.Init.BaudRate = 9600;//1;//4095
+	UART_HandleStructure.Init.WordLength = UART_WORDLENGTH_8B;
+	UART_HandleStructure.Init.StopBits = UART_STOPBITS_1;
+	UART_HandleStructure.Init.Parity = UART_PARITY_NONE; //ou UART_PARITY_EVEN ou UART_PARITY_ODD
+	UART_HandleStructure.Init.Mode = UART_MODE_TX; // ou UART_MODE_RX ou UART_MODE_TX_RX
+	UART_HandleStructure.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	UART_HandleStructure.Init.OverSampling = UART_OVERSAMPLING_8;
+	UART_HandleStructure.Instance = UART4;
+	
+	//HAL_UART_Init(UART_HandleStructure);
+	if(HAL_UART_Init(&UART_HandleStructure) != HAL_OK)
+	{
+		Error_UART();
+	}
+	
+	
+	//AF7 : Pin A0 : USART4_TX
+	__GPIOA_CLK_ENABLE();
+	
+	
+	//Configuration du pin de transmission
+    GPIO_InitTypeDef GPIO_InitStructure_UART;
 
-    Servo_t servo1;
-    init_servo(&servo1, GPIOC, GPIO_PIN_9);
-    set_position_servo(0, &servo1);
-    Delay(1000);
-
-    set_position_servo(45, &servo1);
-    Delay(1000);
-    set_position_servo(90, &servo1);
-    Delay(1000);
-    set_position_servo(135, &servo1);
-    Delay(1000);
-    set_position_servo(180, &servo1);
-    Delay(1000);
-    /*
-    set_position_servo(2200, &servo1);
-    Delay(1000);*/
+    GPIO_InitStructure_UART.Pin = GPIO_PIN_0;
+    GPIO_InitStructure_UART.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStructure_UART.Speed = GPIO_SPEED_HIGH;
+    GPIO_InitStructure_UART.Pull = GPIO_PULLUP;
+    GPIO_InitStructure_UART.Alternate = GPIO_AF8_UART4;
     
-    while(1){
-    	display_PWM(GPIOC, GPIO_PIN_9);
-    }
-    
-    /*test_servo(&servo1, GPIOC, GPIO_PIN_9);*/
+    //Configure this pin in Alternate function mode
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStructure_UART);
+	
+	
+	
+	uint8_t buf[4];
+	buf[0] = 0xF;
+	buf[1] = 0x0;
+	buf[2] = 0xF;
+	buf[3] = 0x0;
+	
+	//char *buf = "empty";
+	
 
-
-
-
-
+	//HAL_UART_Receive_IT(&UART_HandleStructure_R, (uint8_t *)buf, strlen(str));
+	
+	HAL_GPIO_WritePin(GPIOD, LED_VERTE, GPIO_PIN_SET);
+	//HAL_UART_Transmit(&UART_HandleStructure_T, buf, 4, 5000);
+	while (1)
+	{
+			HAL_UART_Transmit(&UART_HandleStructure, buf, 4, 20);
+			buf[0] = 'H';
+			buf[1] = 'e';
+			buf[2] = 'l';
+			buf[3] = 'o';
+	}
     return 0;
 }
 
+/*
+void init_UART_transmitter(UART_HandleTypeDef *UART_HandleStructure) {
+	
 
+	//Configuration de l'UART d'émission
+	UART_HandleStructure->Init.BaudRate = 9600;//1;//4095
+	UART_HandleStructure->Init.WordLength = UART_WORDLENGTH_8B;
+	UART_HandleStructure->Init.StopBits = UART_STOPBITS_1;
+	UART_HandleStructure->Init.Parity = UART_PARITY_NONE; //ou UART_PARITY_EVEN ou UART_PARITY_ODD
+	UART_HandleStructure->Init.Mode = UART_MODE_TX_RX; // ou UART_MODE_RX ou UART_MODE_TX_RX
+	UART_HandleStructure->Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	UART_HandleStructure->Init.OverSampling = UART_OVERSAMPLING_16;
+	UART_HandleStructure->Instance = UART4;
+	
+	//HAL_UART_Init(UART_HandleStructure);
+	if(HAL_UART_Init(UART_HandleStructure) != HAL_OK)
+	{
+		Error_UART();
+	}
+	
+	
+	//AF7 : Pin A0 : USART4_TX
+	__GPIOA_CLK_ENABLE();
+	
+	
+	
+	//Configuration du pin de transmission
+    GPIO_InitTypeDef GPIO_InitStructure_UART;
+
+    GPIO_InitStructure_UART.Pin = GPIO_PIN_0;
+    GPIO_InitStructure_UART.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStructure_UART.Speed = GPIO_SPEED_HIGH;
+    GPIO_InitStructure_UART.Pull = GPIO_PULLUP;
+    GPIO_InitStructure_UART.Alternate = GPIO_AF8_UART4;
+    
+    //Configure this pin in Alternate function mode
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStructure_UART);
+	
+	
+}
+
+void init_UART_receiver(UART_HandleTypeDef *UART_HandleStructure) {
+
+
+	
+    
+	
+	//Configuration de l'UART d'émission
+	UART_HandleStructure->Init.BaudRate = 9600;
+	UART_HandleStructure->Init.WordLength = UART_WORDLENGTH_8B;
+	UART_HandleStructure->Init.StopBits = UART_STOPBITS_1;
+	UART_HandleStructure->Init.Parity = UART_PARITY_NONE; //ou UART_PARITY_EVEN ou UART_PARITY_ODD
+	UART_HandleStructure->Init.Mode = UART_MODE_RX; // ou UART_MODE_RX ou UART_MODE_TX_RX
+	UART_HandleStructure->Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	UART_HandleStructure->Init.OverSampling = UART_OVERSAMPLING_8;
+	UART_HandleStructure->Instance = UART4;
+	
+	HAL_UART_Init(UART_HandleStructure);
+	
+	//AF7 : Pin A1 : UART4_RX
+	__GPIOA_CLK_ENABLE();
+	
+	
+	//Configuration du pin de transmission
+    GPIO_InitTypeDef GPIO_InitStructure_UART;
+
+    GPIO_InitStructure_UART.Pin = GPIO_PIN_1;
+    GPIO_InitStructure_UART.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStructure_UART.Speed = GPIO_SPEED_HIGH;
+    GPIO_InitStructure_UART.Pull = GPIO_PULLUP;
+    GPIO_InitStructure_UART.Alternate = GPIO_AF8_UART4;
+    
+    //Configure this pin in Alternate function mode
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStructure_UART);
+
+}*/
