@@ -5,6 +5,14 @@
 void init_UART_receiver(UART_HandleTypeDef *UART_HandleStructure);
 void init_UART_transmitter(UART_HandleTypeDef *UART_HandleStructure);
 
+/* UART handler declaration */
+UART_HandleTypeDef	UART_HandleStructure_T;
+__IO ITStatus UartReady = RESET;
+
+
+
+
+
 /*
  * Called from systick handler
  */
@@ -32,6 +40,33 @@ void SysTick_Handler(void)
 
 
 
+
+
+
+
+
+
+
+
+
+void UART4_IRQHandler(void)
+{
+	HAL_UART_IRQHandler(&UART_HandleStructure_T);
+}
+
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef	*UART_HandleStructure_T) {
+	/* Set transmission flag: trasfer complete*/
+  UartReady = SET;
+
+	while (1) {
+		Delay(500);
+		HAL_GPIO_TogglePin(GPIOD, LED_ORANGE);
+	}
+}
+
+
+
 void Error_UART(){
 	reset_all_led();
 	while (1) {
@@ -47,10 +82,9 @@ int main(void) {
 	init();
 	init_GPIO_LED();
 	
-	
 	//UART_HandleTypeDef	UART_HandleStructure_T;
-	UART_HandleTypeDef	UART_HandleStructure_R;
-	
+	//UART_HandleTypeDef	UART_HandleStructure_R;
+	/*
 		
 	
 	
@@ -90,14 +124,14 @@ int main(void) {
     //Configure this pin in Alternate function mode
     HAL_GPIO_Init(GPIOA, &GPIO_InitStructure_UART);
 	
+	*/
 	
 	
 	
 	
 	
 	
-	
-	
+	HAL_GPIO_WritePin(GPIOD, LED_VERTE, GPIO_PIN_SET);
 	
 	
 	
@@ -109,10 +143,29 @@ int main(void) {
 	
 	
 	//init_UART_receiver(&UART_HandleStructure_R);
-	//init_UART_transmitter(&UART_HandleStructure_T);
-	//send_word(&UART_HandleStructure_T, "Bonjour cher ami ! \n ^^");
+	init_UART_transmitter(&UART_HandleStructure_T);
 	
 	
+	
+	
+	
+	
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	send_word(&UART_HandleStructure_T, "Bonjour cher ami ! \n ^^");
+	
+	/*
 	uint8_t *buf[4];
 	
 	buf[0] = 'W';
@@ -123,17 +176,17 @@ int main(void) {
 	
 	HAL_GPIO_WritePin(GPIOD, LED_VERTE, GPIO_PIN_SET);
 	//HAL_UART_Transmit(&UART_HandleStructure_T, buf, 4, 5000);
-	
+*/
 	while (1)
 	{
-		HAL_UART_Receive_IT(&UART_HandleStructure_R, (uint8_t *)buf, 4);
-		if (buf[0] != 'W') {
-			while (1) {
+		//HAL_UART_Receive_IT(&UART_HandleStructure_R, (uint8_t *)buf, 4);
+		//if (buf[0] != 'W') {
+		//	while (1) {
 				Delay(500);
-				HAL_GPIO_TogglePin(GPIOD, LED_BLEUE);
-			}
-		}
-		Delay(500);
+				//HAL_GPIO_TogglePin(GPIOD, LED_BLEUE);
+		//	}
+		//}
+		//Delay(500);
 	}
     return 0;
 }
@@ -147,8 +200,11 @@ void send_word(UART_HandleTypeDef *UART_HandleStructure, const char *str) {
 	while (i < size_buffer) {
 		
 	}*/
-	
-	HAL_UART_Transmit(UART_HandleStructure, str, strlen(str), 20);
+	if(HAL_UART_Transmit_IT(UART_HandleStructure, (uint8_t *)str, strlen(str)) != HAL_OK)
+  {
+    Error_UART();
+  }
+	//HAL_UART_Transmit_IT(UART_HandleStructure, str, strlen(str));
 	
 }
 
@@ -157,6 +213,12 @@ void send_word(UART_HandleTypeDef *UART_HandleStructure, const char *str) {
 void init_UART_transmitter(UART_HandleTypeDef *UART_HandleStructure) {
 	
 	__UART4_CLK_ENABLE();
+	
+		
+	/*##-3- Configure the NVIC for UART ########################################*/
+	HAL_NVIC_SetPriority(UART4_IRQn, 0, 1);
+	HAL_NVIC_EnableIRQ(UART4_IRQn);
+	
 	
 	//Configuration de l'UART d'émission
 	UART_HandleStructure->Init.BaudRate = 9600;//1;//4095
@@ -167,6 +229,8 @@ void init_UART_transmitter(UART_HandleTypeDef *UART_HandleStructure) {
 	UART_HandleStructure->Init.HwFlowCtl = UART_HWCONTROL_NONE;
 	UART_HandleStructure->Init.OverSampling = UART_OVERSAMPLING_8;
 	UART_HandleStructure->Instance = UART4;
+	
+	
 	
 	//HAL_UART_Init(UART_HandleStructure);
 	if(HAL_UART_Init(UART_HandleStructure) != HAL_OK)
