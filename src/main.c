@@ -10,6 +10,7 @@ UART_HandleTypeDef	UART_HandleStructure_T;
 UART_HandleTypeDef	UART_HandleStructure_R;
 
 uint8_t str[1];
+uint8_t tmp;
 
 
 
@@ -61,9 +62,11 @@ void Error_UART(){
 	}
 }
 
-
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
+	tmp = *str;
+}
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
-	reset_all_led();
+	/*reset_all_led();
 	if (str[0] == 'o') {
 		set_all_led();
 	} else if (str[0] == 'a'){
@@ -71,7 +74,61 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	}
 	else {
 		HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+	}*/
+	if (*str == tmp) {
+		if(HAL_UART_Transmit(&UART_HandleStructure_T, ". Bien reçu la lettre ", 23, 20) != HAL_OK)
+		{
+			HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+	  	}
+	  	if(HAL_UART_Transmit(&UART_HandleStructure_T, str, 1, 20) != HAL_OK)
+		{
+			HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+	  	}
+	  	if(HAL_UART_Transmit(&UART_HandleStructure_T, "\n\n\rDemande la lettre ", 21, 20) != HAL_OK)
+		{
+			HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+	  	}
+	  	*str += 1;
+	  	tmp = *str;
+	  	if(HAL_UART_Transmit(&UART_HandleStructure_T, str, 1, 20) != HAL_OK)
+		{
+			HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+	  	}
+	  	if(HAL_UART_Receive_IT(&UART_HandleStructure_T, str, 1) != HAL_OK)
+		{
+		HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+		}
+	} else {
+		if(HAL_UART_Transmit(&UART_HandleStructure_T, "Je n'ai pas reçu la lettre ", 28, 20) != HAL_OK)
+		{
+			HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+	  	}
+	  	if(HAL_UART_Transmit(&UART_HandleStructure_T, &tmp, 1, 20) != HAL_OK)
+		{
+			HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+	  	}
+	  	if(HAL_UART_Transmit(&UART_HandleStructure_T, ". Mais j'ai reçu la lettre ", 28, 20) != HAL_OK)
+		{
+			HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+	  	}
+	  	if(HAL_UART_Transmit(&UART_HandleStructure_T, str, 1, 20) != HAL_OK)
+		{
+			HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+	  	}
+	  	if(HAL_UART_Transmit(&UART_HandleStructure_T, "\n\n\rDemande la lettre ", 21, 20) != HAL_OK)
+		{
+			HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+	  	}
+	  	if(HAL_UART_Transmit(&UART_HandleStructure_T, &tmp, 1, 20) != HAL_OK)
+		{
+			HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+	  	}
+	  	if(HAL_UART_Receive_IT(&UART_HandleStructure_T, str, 1) != HAL_OK)
+		{
+		HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+		}
 	}
+	
 	
 }
 
@@ -146,9 +203,14 @@ int main(void) {
 	
 	
 	str[0] = 'a';
+	//str[1] = '\0';
+	//uint req[1];
 	init_UART_transmitter(&UART_HandleStructure_T);
 	//init_UART_receiver(&UART_HandleStructure_R);
 	
+	send_word(&UART_HandleStructure_T, "\n\n\rDemande la lettre ");
+	Delay(50);
+	send_word(&UART_HandleStructure_T, str);
 	
 	
 	if(HAL_UART_Receive_IT(&UART_HandleStructure_T, str, 1) != HAL_OK)
@@ -166,8 +228,6 @@ int main(void) {
 	
 	
 	
-	uint32_t preempt;
-	uint32_t subpri;
 	/*
 	HAL_NVIC_GetPriority(SysTick_IRQn, NVIC_PRIORITYGROUP_2, &preempt, &subpri);
 	
