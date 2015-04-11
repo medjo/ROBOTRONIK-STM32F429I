@@ -9,6 +9,7 @@
 #include "error.h"
 #include "LED.h"
 #include "servo.h"
+#include "UART.h"
 
 volatile uint32_t time_var1, time_var2;
 
