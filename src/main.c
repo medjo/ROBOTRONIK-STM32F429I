@@ -7,9 +7,9 @@ void init_UART_transmitter(UART_HandleTypeDef *UART_HandleStructure);
 
 /* UART handler declaration */
 UART_HandleTypeDef	UART_HandleStructure_T;
-__IO ITStatus UartReady = RESET;
+UART_HandleTypeDef	UART_HandleStructure_R;
 
-
+uint8_t str[1];
 
 
 
@@ -46,25 +46,11 @@ void SysTick_Handler(void)
 
 
 
-
-
-
 void UART4_IRQHandler(void)
 {
+
 	HAL_UART_IRQHandler(&UART_HandleStructure_T);
 }
-
-
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef	*UART_HandleStructure_T) {
-	/* Set transmission flag: trasfer complete*/
-  UartReady = SET;
-
-	while (1) {
-		Delay(500);
-		HAL_GPIO_TogglePin(GPIOD, LED_ORANGE);
-	}
-}
-
 
 
 void Error_UART(){
@@ -74,6 +60,24 @@ void Error_UART(){
 		HAL_GPIO_TogglePin(GPIOD, LED_ROUGE);
 	}
 }
+
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+	reset_all_led();
+	if (str[0] == 'o') {
+		set_all_led();
+	} else if (str[0] == 'a'){
+		HAL_GPIO_WritePin(GPIOD, LED_ORANGE, GPIO_PIN_SET);
+	}
+	else {
+		HAL_GPIO_WritePin(GPIOD, LED_ROUGE, GPIO_PIN_SET);
+	}
+	
+}
+
+
+
+
 
 void send_word(UART_HandleTypeDef *UART_HandleStructure, const char *str);
 
@@ -131,7 +135,6 @@ int main(void) {
 	
 	
 	
-	HAL_GPIO_WritePin(GPIOD, LED_VERTE, GPIO_PIN_SET);
 	
 	
 	
@@ -142,13 +145,16 @@ int main(void) {
 	
 	
 	
-	//init_UART_receiver(&UART_HandleStructure_R);
+	str[0] = 'a';
 	init_UART_transmitter(&UART_HandleStructure_T);
+	//init_UART_receiver(&UART_HandleStructure_R);
 	
 	
 	
-	
-	
+	if(HAL_UART_Receive_IT(&UART_HandleStructure_T, str, 1) != HAL_OK)
+  {
+    Error_UART();
+  }
 	
 	
 	
@@ -160,10 +166,26 @@ int main(void) {
 	
 	
 	
+	uint32_t preempt;
+	uint32_t subpri;
+	/*
+	HAL_NVIC_GetPriority(SysTick_IRQn, NVIC_PRIORITYGROUP_2, &preempt, &subpri);
 	
-	
-	
-	send_word(&UART_HandleStructure_T, "Bonjour cher ami ! \n ^^");
+	preempt += 48;
+	subpri += 48;
+	send_word(&UART_HandleStructure_T, "\tpreempt : ");
+	Delay(50);	
+	send_word(&UART_HandleStructure_T, &preempt );
+	Delay(50);
+	send_word(&UART_HandleStructure_T, "\n");
+	Delay(50);
+	send_word(&UART_HandleStructure_T, "subpri : ");
+	Delay(50);
+	send_word(&UART_HandleStructure_T, &subpri );
+	Delay(50);
+	send_word(&UART_HandleStructure_T, "\n");
+	Delay(50);*/
+	HAL_GPIO_WritePin(GPIOD, LED_VERTE, GPIO_PIN_SET);
 	
 	/*
 	uint8_t *buf[4];
@@ -183,7 +205,7 @@ int main(void) {
 		//if (buf[0] != 'W') {
 		//	while (1) {
 				Delay(500);
-				//HAL_GPIO_TogglePin(GPIOD, LED_BLEUE);
+				HAL_GPIO_TogglePin(GPIOD, LED_BLEUE);
 		//	}
 		//}
 		//Delay(500);
@@ -216,7 +238,7 @@ void init_UART_transmitter(UART_HandleTypeDef *UART_HandleStructure) {
 	
 		
 	/*##-3- Configure the NVIC for UART ########################################*/
-	HAL_NVIC_SetPriority(UART4_IRQn, 0, 1);
+	HAL_NVIC_SetPriority(UART4_IRQn, 4, 4);
 	HAL_NVIC_EnableIRQ(UART4_IRQn);
 	
 	
@@ -247,7 +269,7 @@ void init_UART_transmitter(UART_HandleTypeDef *UART_HandleStructure) {
 	//Configuration du pin de transmission
     GPIO_InitTypeDef GPIO_InitStructure_UART;
 
-    GPIO_InitStructure_UART.Pin = GPIO_PIN_0;
+    GPIO_InitStructure_UART.Pin = GPIO_PIN_0|GPIO_PIN_1;
     GPIO_InitStructure_UART.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStructure_UART.Speed = GPIO_SPEED_HIGH;
     GPIO_InitStructure_UART.Pull = GPIO_PULLUP;
