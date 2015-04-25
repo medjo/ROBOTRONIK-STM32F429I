@@ -3,7 +3,6 @@
 
 void UART4_IRQHandler(void)
 {
-
 	HAL_UART_IRQHandler(&UART_HandleStructure_T);
 }
 
@@ -188,3 +187,4 @@ void test_UART_TX_RX(){
 		HAL_GPIO_TogglePin(GPIOD, LED_BLEUE);
 	}
 }
+

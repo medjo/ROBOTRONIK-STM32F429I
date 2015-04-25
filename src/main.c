@@ -37,10 +37,13 @@ void SysTick_Handler(void)
 
 
 int main(void) {
-	init();
+	/*init();
 	init_GPIO_LED();
-	
+	init_LED_debug();*/
 	test_UART_TX_RX();
+	int i;
+
+	//test_UART_TX_RX();
     return 0;
 }
 
